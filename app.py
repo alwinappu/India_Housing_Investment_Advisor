@@ -218,7 +218,7 @@ with tab3:
             search_city = st.selectbox("🏙️ Select City", ["All"] + sorted(df_search['City'].unique().tolist()))
         
         with col2:
-            search_property_type = st.selectbox("🏠 Property Type", ["All"] + sorted(df_search['PropertyType'].unique().tolist()))
+            search_property_type = st.selectbox("🏠 Property Type", ["All"] + sorted(df_search['Property_Type'].unique().tolist()))
         
         with col3:
             search_bhk = st.selectbox("🛏️ BHK", ["All"] + sorted([str(x) for x in df_search['BHK'].unique().tolist()]))
@@ -246,16 +246,16 @@ with tab3:
             filtered_df = filtered_df[filtered_df['City'] == search_city]
         
         if search_property_type != "All":
-            filtered_df = filtered_df[filtered_df['PropertyType'] == search_property_type]
+            filtered_df = filtered_df[filtered_df['Property_Type'] == search_property_type]
         
         if search_bhk != "All":
             filtered_df = filtered_df[filtered_df['BHK'] == int(search_bhk)]
         
         filtered_df = filtered_df[
-            (filtered_df['PriceinLakhs'] >= min_price) & 
-            (filtered_df['PriceinLakhs'] <= max_price) &
-            (filtered_df['SizeinSqFt'] >= min_size) &
-            (filtered_df['SizeinSqFt'] <= max_size)
+            (filtered_df['Price_in_Lakhs'] >= min_price) & 
+            (filtered_df['Price_in_Lakhs'] <= max_price) &
+            (filtered_df['Size_in_SqFt'] >= min_size) &
+            (filtered_df['Size_in_SqFt'] <= max_size)
         ]
         
         # Display results
@@ -277,13 +277,13 @@ with tab3:
             col_stat1, col_stat2, col_stat3 = st.columns(3)
             
             with col_stat1:
-                st.metric("Average Price", f"₹{filtered_df['PriceinLakhs'].mean():.2f}L")
+                st.metric("Average Price", f"₹{filtered_df['Price_in_Lakhs'].mean():.2f}L")
             
             with col_stat2:
-                st.metric("Average Size", f"{filtered_df['SizeinSqFt'].mean():.0f} Sq Ft")
+                st.metric("Average Size", f"{filtered_df['Size_in_SqFt'].mean():.0f} Sq Ft")
             
             with col_stat3:
-                st.metric("Avg Price/SqFt", f"₹{filtered_df['PriceperSqFt'].mean():.0f}")
+                st.metric("Avg Price/SqFt", f"₹{filtered_df['Price_per_SqFt'].mean():.0f}")
         else:
             st.warning("No properties found matching your criteria. Try adjusting the filters.")
     
