@@ -205,16 +205,91 @@ with tab2:
 # Tab 3: Property Search
 with tab3:
     st.markdown('<h2 class="section-header">Property Search & Filter</h2>', unsafe_allow_html=True)
-    st.info("🔍 Advanced property search functionality - Coming soon!")
-    st.markdown("""
-    **Planned Features:**
-    - Search properties by location, price range, and amenities
-    - Interactive map view of properties
-    - Detailed property comparison tool
-    - Save favorite properties
-    - Price alert notifications
-    """)
-
+    # Load sample data for search
+    try:
+        df_search = pd.read_csv('india_housing_clean.csv')
+        
+        st.markdown('<div class="filter-section">', unsafe_allow_html=True)
+        
+        # Search filters
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            search_city = st.selectbox("🏙️ Select City", ["All"] + sorted(df_search['City'].unique().tolist()))
+        
+        with col2:
+            search_property_type = st.selectbox("🏠 Property Type", ["All"] + sorted(df_search['PropertyType'].unique().tolist()))
+        
+        with col3:
+            search_bhk = st.selectbox("🛏️ BHK", ["All"] + sorted([str(x) for x in df_search['BHK'].unique().tolist()]))
+        
+        # Price range filter
+        col4, col5 = st.columns(2)
+        with col4:
+            min_price = st.number_input("💰 Min Price (Lakhs)", min_value=0, value=0, step=10)
+        with col5:
+            max_price = st.number_input("💰 Max Price (Lakhs)", min_value=0, value=1000, step=10)
+        
+        # Size range filter
+        col6, col7 = st.columns(2)
+        with col6:
+            min_size = st.number_input("📏 Min Size (Sq Ft)", min_value=0, value=0, step=100)
+        with col7:
+            max_size = st.number_input("📏 Max Size (Sq Ft)", min_value=0, value=5000, step=100)
+        
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        # Filter data
+        filtered_df = df_search.copy()
+        
+        if search_city != "All":
+            filtered_df = filtered_df[filtered_df['City'] == search_city]
+        
+        if search_property_type != "All":
+            filtered_df = filtered_df[filtered_df['PropertyType'] == search_property_type]
+        
+        if search_bhk != "All":
+            filtered_df = filtered_df[filtered_df['BHK'] == int(search_bhk)]
+        
+        filtered_df = filtered_df[
+            (filtered_df['PriceinLakhs'] >= min_price) & 
+            (filtered_df['PriceinLakhs'] <= max_price) &
+            (filtered_df['SizeinSqFt'] >= min_size) &
+            (filtered_df['SizeinSqFt'] <= max_size)
+        ]
+        
+        # Display results
+        st.markdown(f"### 🔍 Found {len(filtered_df)} Properties")
+        
+        if len(filtered_df) > 0:
+            # Show top 20 results
+            display_columns = ['City', 'PropertyType', 'BHK', 'SizeinSqFt', 'PriceinLakhs', 'PriceperSqFt']
+            available_columns = [col for col in display_columns if col in filtered_df.columns]
+            
+            st.dataframe(
+                filtered_df[available_columns].head(20),
+                use_container_width=True,
+                hide_index=True
+            )
+            
+            # Summary statistics
+            st.markdown("### 📊 Summary Statistics")
+            col_stat1, col_stat2, col_stat3 = st.columns(3)
+            
+            with col_stat1:
+                st.metric("Average Price", f"₹{filtered_df['PriceinLakhs'].mean():.2f}L")
+            
+            with col_stat2:
+                st.metric("Average Size", f"{filtered_df['SizeinSqFt'].mean():.0f} Sq Ft")
+            
+            with col_stat3:
+                st.metric("Avg Price/SqFt", f"₹{filtered_df['PriceperSqFt'].mean():.0f}")
+        else:
+            st.warning("No properties found matching your criteria. Try adjusting the filters.")
+    
+    except FileNotFoundError:
+        st.info("🔍 Property database not found. Upload 'india_housing_clean.csv' to enable search functionality.")
+        st.markdown("""**Planned Features:**\n- Search properties by location, price range, and amenities\n- Interactive map view of properties\n- Detailed property comparison tool\n- Save favorite properties\n- Price alert notifications""")
 # Tab 4: About & Skills
 with tab4:
     st.markdown('<h2 class="section-header">About This Project</h2>', unsafe_allow_html=True)
